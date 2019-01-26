@@ -1,4 +1,3 @@
-require('dotenv').config();
 const axios = require('axios');
 const { authenticate } = require('../auth/authenticate');
 const bcrypt = require('bcryptjs');
