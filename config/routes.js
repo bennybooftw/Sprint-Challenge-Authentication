@@ -25,8 +25,31 @@ function register(req, res) {
     .catch(err => json(err));
 }
 
+function generateToken(user) {
+  const payload = {
+    subject: user.id,
+    username: user.username
+  };
+  const secret = process.env.JWT_KEY;
+  const options = {
+    expiresIn: "2h"
+  };
+  return jwt.sign(payload, secret, options);
+}
+
 function login(req, res) {
-  // implement user login
+  const creds = req.body;
+  db('users')
+    .where({ username: creds.username })
+    .first()
+    .then(user => {
+      if (user && bcrypt.compareSync(creds.password, user.password)) {
+        const token = generateToken(user);
+        res.status(200).json({ message: "Welcome!", token});
+      } else {
+        res.status(401).json({ message: "Not authorized." });
+      }
+    })
 }
 
 function getJokes(req, res) {
