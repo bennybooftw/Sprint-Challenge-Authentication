@@ -1,6 +1,11 @@
+require('dotenv').config();
 const axios = require('axios');
-
 const { authenticate } = require('../auth/authenticate');
+const bcrypt = require('bcryptjs');
+const knex = require('knex');
+const knexConfig = require('../knexfile');
+const db = knex(knexConfig.development);
+const jwt = require('jsonwebtoken');
 
 module.exports = server => {
   server.post('/api/register', register);
@@ -9,7 +14,15 @@ module.exports = server => {
 };
 
 function register(req, res) {
-  // implement user registration
+  const creds = req.body;
+  const hash = bcrypt.hashSync(creds.password, 14);
+  creds.password = hash;
+  db('users')
+    .insert(creds)
+    .then(ids => {
+      res.status(201).json(ids);
+    })
+    .catch(err => json(err));
 }
 
 function login(req, res) {
